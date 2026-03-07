@@ -20,8 +20,9 @@
 - **Spectral Manifold Learning:** PCA + UMAP to cluster tissue phenotypes from high-dimensional spectral bands.
 - **Deep Spatial Segmentation:** PyTorch U-Net adapted for hyperspectral input tensors (H × W × Bands).
 - **Big Data Ingestion:** Streaming API pipeline from Zenodo REST to handle multi-GB data cubes.
+- **🖥️ Interactive Pathology Viewer:** Streamlit dashboard — tile selector, live U-Net inference, spectral explorer, and clinical report.
 - **DSGVO/GDPR by Design:** Anonymized Tissue Microarray (TMA) cohort — no personally identifiable patient data.
-- **EU Regulatory Awareness:** Architecture organized in alignment with ISO 13485 and EU AI Act Article 13.
+- **EU Regulatory Awareness:** Architecture documented in alignment with ISO 13485 and EU AI Act Article 13.
 
 ---
 
@@ -151,6 +152,10 @@ python run_training.py
 
 # 7. Evaluate the best checkpoint and generate all result figures
 python 06_inference_and_evaluation.py
+
+# 8. Launch the interactive Pathology Viewer dashboard
+pip install -r app_requirements.txt
+streamlit run app.py
 ```
 
 ---
