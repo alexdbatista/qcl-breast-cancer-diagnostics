@@ -1,5 +1,6 @@
-# Ignore data
+# Ignore data and model artifacts
 data/
+models/*.pth
 *.mat
 *.h5
 *.hdr

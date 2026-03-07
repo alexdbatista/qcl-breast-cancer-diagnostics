@@ -78,6 +78,8 @@ flowchart TD
     D --> D1 --> D2 --> D3
 
     D3 --> E["Segmentation Mask\n4 Histological Classes"]:::output
+    E --> F("04: Training Loop\nAdamW + Cosine LR + Early Stopping"):::process
+    F --> G["best_unet_qcl.pth\n+ training_history.json"]:::output
 ```
 
 ---
@@ -98,7 +100,13 @@ flowchart TD
 - **UMAP:** Non-linear manifold embedding to visualize phenotypic clusters (e.g., Tumor vs. Stroma).
 - **Output:** Saves PCA-reduced cubes to `data/processed/` for downstream model training.
 
-### Module 03 — Deep Spatial Segmentation (`03_spatial_cnn_segmentation.py`)
+### Module 04 — Model Training (`04_model_training.py`)
+- **Dataset:** `HyperspectralTMADataset` — patch-based sampling (64×64 crops) to load multi-GB cubes without exhausting VRAM.
+- **Augmentation:** Random horizontal and vertical flips to improve generalization across tissue orientations.
+- **Loss Function:** `CombinedSegmentationLoss` — Weighted CrossEntropy + Soft Dice (50/50). Malignant Stroma class is upweighted (×2.5) to resolve class imbalance.
+- **Optimizer:** AdamW with Cosine Annealing LR schedule and early stopping (patience=10).
+- **Metrics:** Per-class IoU and Dice — with dedicated tracking of **Malignant Stroma IoU** as the primary clinical performance metric.
+- **Output:** Best checkpoint saved to `models/best_unet_qcl.pth` with full `training_history.json`.
 - **Architecture:** `HyperspectralUNet` — a modified U-Net with an initial `1×1` convolution that functions as a learned, non-linear spectral projection layer.
 - **Skip Connections:** Encoder feature maps are reinjected at each decoder scale to preserve spatial context—critical for accurate tissue boundary delineation.
 - **Input:** `(Batch, Bands, Height, Width)` hyperspectral tensor.
@@ -145,16 +153,20 @@ jupyter notebook 02_spectral_dimensionality_reduction.ipynb
 
 ```
 qcl-breast-cancer-diagnostics/
-├── 01_data_ingestion.py                   # Zenodo REST API streaming pipeline
+├── 01_data_ingestion.py                        # Zenodo REST API streaming pipeline
 ├── 02_spectral_dimensionality_reduction.ipynb  # PCA + UMAP phenotype discovery
-├── 03_spatial_cnn_segmentation.py         # PyTorch Hyperspectral U-Net
-├── DATA_README.md                         # Dataset provenance & licensing
-├── README.md                              # This file
-├── requirements.txt                       # Python dependencies
+├── 03_spatial_cnn_segmentation.py              # PyTorch Hyperspectral U-Net architecture
+├── 04_model_training.py                        # Training loop, metrics, checkpointing
+├── DATA_README.md                              # Dataset provenance & licensing
+├── README.md                                   # This file
+├── requirements.txt                            # Python dependencies
 ├── data/
-│   ├── raw/                               # Raw .mat cubes (gitignored)
-│   └── processed/                         # PCA-reduced tensors (gitignored)
-└── .gitignore                             # Excludes all large binary files
+│   ├── raw/                                    # Raw .mat cubes (gitignored)
+│   └── processed/                              # PCA-reduced tensors (gitignored)
+├── models/
+│   ├── best_unet_qcl.pth                       # Best model checkpoint (gitignored)
+│   └── training_history.json                   # Epoch-level metrics log
+└── .gitignore                                  # Excludes all large binary files
 ```
 
 ---
