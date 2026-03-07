@@ -21,16 +21,26 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 # Download Logic (Regulatory/Pipeline focus)
 # ---------------------------------------------------------------------------
 
-def download_file(url: str, dest_path: Path):
+def download_file(url: str, dest_path: Path) -> None:
     """
-    Download a file from an external URL with a progress bar.
-    
+    Stream a remote file from a URL to a local destination path.
+
+    Uses chunked transfer to handle multi-GB hyperspectral cubes without
+    exhausting system memory. Skips the download if the file already exists.
+
     Parameters
     ----------
     url : str
-        The direct download link (e.g., from the Zenodo API).
+        The direct download link (from the Zenodo API file record).
     dest_path : Path
-        Local filesystem destination for the downloaded file.
+        Local filesystem path where the file will be saved.
+
+    Raises
+    ------
+    requests.exceptions.HTTPError
+        If the server returns a non-2xx HTTP status code.
+    IOError
+        If the downloaded file size does not match the Content-Length header.
     """
     if dest_path.exists():
         print(f"[INFO] File already exists at {dest_path}. Skipping download.")
@@ -59,7 +69,21 @@ def download_file(url: str, dest_path: Path):
 
 
 def get_zenodo_files() -> list:
-    """Query the Zenodo API to fetch all file URLs associated with the DOI."""
+    """
+    Query the Zenodo REST API to retrieve all file records for a given DOI.
+
+    Returns
+    -------
+    list of dict
+        Each dict contains: 'filename' (str), 'url' (str), 'size_mb' (float).
+
+    Raises
+    ------
+    requests.exceptions.ConnectionError
+        If the Zenodo API is unreachable.
+    requests.exceptions.HTTPError
+        If the record ID is invalid or the record is restricted.
+    """
     print(f"[INFO] Querying Zenodo API for record {ZENODO_DOI}...")
     response = requests.get(ZENODO_API_URL)
     response.raise_for_status()
