@@ -211,8 +211,8 @@ def load_history():
 def n01(a): a=a.astype(np.float32); return (a-a.min())/(a.max()-a.min()+1e-8)
 
 def seg_fig(img_arr, cmap, title, vmin=None, vmax=None, is_rgb=False, colorbar=False):
-    """Render a matplotlib figure on the dark background — no white borders."""
-    fig, ax = plt.subplots(figsize=(4,4), facecolor=FIG_BG)
+    """Render a matplotlib figure — fixed 5×5" @ 90dpi so it renders at ~450px max."""
+    fig, ax = plt.subplots(figsize=(5, 5), dpi=90, facecolor=FIG_BG)
     ax.set_facecolor(FIG_BG)
     if is_rgb:
         ax.imshow(img_arr)
@@ -221,10 +221,10 @@ def seg_fig(img_arr, cmap, title, vmin=None, vmax=None, is_rgb=False, colorbar=F
         if colorbar:
             cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
             cb.ax.yaxis.set_tick_params(color="white")
-            plt.setp(plt.getp(cb.ax.axes, 'yticklabels'), color='#94a3b8', fontsize=7)
-    ax.set_title(title, color="#94a3b8", fontsize=8.5, pad=5, fontfamily="DejaVu Sans")
+            plt.setp(plt.getp(cb.ax.axes, 'yticklabels'), color='#94a3b8', fontsize=8)
+    ax.set_title(title, color="#94a3b8", fontsize=9, pad=6, fontfamily="DejaVu Sans")
     ax.axis("off")
-    plt.tight_layout(pad=0.1)
+    plt.tight_layout(pad=0.2)
     return fig
 
 def tile_stats(labels, pred=None):
@@ -272,7 +272,7 @@ for col, (val, lbl, sub) in zip(cols, kpis):
         <div class="mcard-sub">{sub}</div>
     </div>""", unsafe_allow_html=True)
 
-st.markdown("<br>", unsafe_allow_html=True)
+
 
 # ── Tabs ─────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -416,9 +416,9 @@ with tab2:
         # ── 3 Plotly charts in a row ──────────────────────────────────────
         c1, c2, c3 = st.columns(3)
         _layout = dict(template="plotly_dark", paper_bgcolor="#0f172a",
-                       plot_bgcolor="#0a0f1e", height=300,
+                       plot_bgcolor="#0a0f1e", height=380,
                        font=dict(family="Inter", size=11, color="#94a3b8"),
-                       margin=dict(l=40,r=10,t=40,b=30))
+                       margin=dict(l=50,r=20,t=50,b=40))
 
         with c1:
             fig = go.Figure()
@@ -474,34 +474,42 @@ with tab2:
 
     st.markdown("---")
 
-    # ── Per-class metrics Plotly bar chart ───────────────────────────────
+    # ── Per-class metrics Plotly bar chart (centered so bars aren't too wide) ──
     st.markdown('<p class="sec">📐 Final Per-Class Metrics (Validation Tile)</p>',
                 unsafe_allow_html=True)
     iou_vals  = [0.916, 0.378, 0.961, 0.911]
     dice_vals = [0.956, 0.549, 0.980, 0.954]
 
-    fig = go.Figure()
-    fig.add_trace(go.Bar(name="IoU",  x=CLASS_NAMES, y=iou_vals,
-                         marker_color=CLASS_COLOURS, opacity=0.9,
-                         text=[f"{v:.3f}" for v in iou_vals],  textposition="outside"))
-    fig.add_trace(go.Bar(name="Dice", x=CLASS_NAMES, y=dice_vals,
-                         marker_color=CLASS_COLOURS, opacity=0.5,
-                         text=[f"{v:.3f}" for v in dice_vals], textposition="outside"))
-    fig.add_hline(y=0.90, line_dash="dot", line_color="#94a3b8",
-                  annotation_text="Clinical target 0.90", annotation_position="top right",
-                  annotation_font_color="#94a3b8")
-    fig.update_layout(**_layout, title="Per-Class IoU & Dice — Held-Out Validation Tile",
-                      barmode="group", yaxis=dict(range=[0, 1.15]),
-                      legend=dict(bgcolor="#0f172a", bordercolor="#1e293b"))
-    st.plotly_chart(fig, use_container_width=True)
+    _, bar_col, _ = st.columns([1, 3, 1])
+    with bar_col:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name="IoU",  x=CLASS_NAMES, y=iou_vals,
+                             marker_color=CLASS_COLOURS, opacity=0.9,
+                             text=[f"{v:.3f}" for v in iou_vals],  textposition="outside"))
+        fig.add_trace(go.Bar(name="Dice", x=CLASS_NAMES, y=dice_vals,
+                             marker_color=CLASS_COLOURS, opacity=0.5,
+                             text=[f"{v:.3f}" for v in dice_vals], textposition="outside"))
+        fig.add_hline(y=0.90, line_dash="dot", line_color="#94a3b8",
+                      annotation_text="Clinical target 0.90", annotation_position="top right",
+                      annotation_font_color="#94a3b8")
+        fig.update_layout(template="plotly_dark", paper_bgcolor="#0f172a",
+                          plot_bgcolor="#0a0f1e", height=380,
+                          font=dict(family="Inter", size=12, color="#94a3b8"),
+                          margin=dict(l=50,r=20,t=50,b=50),
+                          title="Per-Class IoU & Dice — Held-Out Validation Tile",
+                          barmode="group", yaxis=dict(range=[0, 1.2]),
+                          legend=dict(bgcolor="#0f172a", bordercolor="#1e293b"))
+        st.plotly_chart(fig, use_container_width=True)
 
-    # ── Segmentation figure embedded ─────────────────────────────────────
+    # ── Segmentation figure embedded (centred, max 1100px) ──────────────
     fig_path = FIGURES_DIR / "07_segmentation_results.png"
     if fig_path.exists():
         st.markdown("---")
         st.markdown('<p class="sec">🖼️ Segmentation Comparison — Best Checkpoint</p>',
                     unsafe_allow_html=True)
-        st.image(str(fig_path), use_container_width=True)
+        _, img_col, _ = st.columns([1, 6, 1])
+        with img_col:
+            st.image(str(fig_path), use_container_width=True)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -579,7 +587,7 @@ with tab3:
 # TAB 4 — CLINICAL REPORT
 # ════════════════════════════════════════════════════════════════════════════
 with tab4:
-    left, right = st.columns([3, 2])
+    left, right = st.columns([1, 1])
 
     with left:
         st.markdown('<p class="sec">🏆 Model Performance vs. Clinical Targets</p>',
