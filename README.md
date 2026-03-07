@@ -29,7 +29,7 @@ This project is structured iteratively, mimicking an industrial AI R&D pipeline 
 2. **Spectral Dimensionality Reduction (Module 02):**
    - Applies Manifold Learning (UMAP, t-SNE) to identify underlying phenotype clusters inside the 'fingerprint' IR region (912 to 1800 cm⁻¹).
 3. **Deep Spatial Segmentation (Module 03):**
-   - Trains a convolutional architecture (e.g., U-Net or Vision Transformer) to classify pixels into histological classes (e.g., Malignant Stroma vs. Benign).
+   - Trains a convolutional architecture (PyTorch Hyperspectral U-Net) to classify pixels into histological classes (e.g., Malignant Stroma vs. Benign).
 
 ---
 
