@@ -1,0 +1,10 @@
+# Ignore data
+data/
+*.mat
+*.h5
+*.hdr
+*.envi
+
+# Python
+__pycache__/
+*.py[cod]
