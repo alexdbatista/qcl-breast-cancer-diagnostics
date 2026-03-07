@@ -137,14 +137,20 @@ cd data-science-portfolio/qcl-breast-cancer-diagnostics
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Fetch the dataset from Zenodo (requires internet)
+# 3. Fetch the ~26 GB dataset from Zenodo (requires internet)
 python 01_data_ingestion.py
 
-# 4. Validate U-Net architecture (no data required)
-python 03_spatial_cnn_segmentation.py
+# 4. Run full preprocessing pipeline (PCA, figures)
+python run_pipeline.py
 
-# 5. Open the EDA & Manifold Learning Notebook
-jupyter notebook 02_spectral_dimensionality_reduction.ipynb
+# 5. Generate K-Means pseudo-labels for supervised training
+python 05_clustering_and_evaluation.py
+
+# 6. Train the Hyperspectral U-Net on Apple MPS / CUDA / CPU
+python run_training.py
+
+# 7. Evaluate the best checkpoint and generate all result figures
+python 06_inference_and_evaluation.py
 ```
 
 ---
@@ -157,15 +163,21 @@ qcl-breast-cancer-diagnostics/
 ├── 02_spectral_dimensionality_reduction.ipynb  # PCA + UMAP phenotype discovery
 ├── 03_spatial_cnn_segmentation.py              # PyTorch Hyperspectral U-Net architecture
 ├── 04_model_training.py                        # Training loop, metrics, checkpointing
+├── 05_clustering_and_evaluation.py             # K-Means pseudo-label generation
+├── 06_inference_and_evaluation.py              # Sliding-window inference & results
+├── run_pipeline.py                             # End-to-end preprocessing runner
+├── run_training.py                             # Self-contained training runner
 ├── DATA_README.md                              # Dataset provenance & licensing
 ├── README.md                                   # This file
 ├── requirements.txt                            # Python dependencies
 ├── data/
 │   ├── raw/                                    # Raw .mat cubes (gitignored)
-│   └── processed/                              # PCA-reduced tensors (gitignored)
+│   ├── processed/                              # PCA-reduced tensors (gitignored)
+│   └── labels/                                 # K-Means pseudo-labels (gitignored)
 ├── models/
 │   ├── best_unet_qcl.pth                       # Best model checkpoint (gitignored)
 │   └── training_history.json                   # Epoch-level metrics log
+├── figures/                                    # All generated plots (gitignored)
 └── .gitignore                                  # Excludes all large binary files
 ```
 
