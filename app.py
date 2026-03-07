@@ -36,6 +36,14 @@ st.markdown("""
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 .stApp { background-color: #070d1a; color: #e2e8f0; }
 
+/* ── Hide Streamlit chrome ── */
+header[data-testid="stHeader"],
+#MainMenu,
+footer,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] { display: none !important; }
+.block-container { padding-top: 1.5rem !important; }
+
 /* ── Hero ── */
 .hero {
     background: linear-gradient(135deg, #14223a 0%, #0f172a 60%, #1a0b2e 100%);
