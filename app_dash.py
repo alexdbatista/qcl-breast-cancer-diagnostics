@@ -2290,11 +2290,22 @@ app.layout = html.Div([
                               "border": "2px solid #003d82", "color": "#003d82",
                               "fontWeight": "600", "borderRadius": "8px",
                               "padding": "0.5rem 1.2rem", "display": "none"}),
-            html.Div(id="analysis-status", className="mt-3"),
+            dcc.Loading(
+                id="loading-status",
+                type="circle",
+                color="#003d82",
+                children=html.Div(id="analysis-status", className="mt-3"),
+            ),
         ], className="controls-panel", id="sec-analysis"),
 
         # ── Dynamic content area ──────────────────────────────────────────
-        html.Div(id="main-content"),
+        dcc.Loading(
+            id="loading-main",
+            type="default",
+            color="#003d82",
+            fullscreen=False,
+            children=html.Div(id="main-content"),
+        ),
 
         # ── Technical Specifications ──────────────────────────────────────
         html.Hr(className="qcl-divider"),
@@ -2501,9 +2512,14 @@ def run_or_show(run_clicks, reset_clicks, sample_id, store):
     if cube is None or labels is None:
         return store, dbc.Alert("❌ Could not load sample data.", color="danger"), pre_analysis_content(), _RESET_HIDDEN
 
-    results = run_analysis(sample_id)
+    try:
+        results = run_analysis(sample_id)
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        return store, dbc.Alert(f"❌ Analysis error: {exc}", color="danger"), pre_analysis_content(), _RESET_HIDDEN
     if results is None:
-        return store, dbc.Alert("❌ Analysis failed.", color="danger"), pre_analysis_content(), _RESET_HIDDEN
+        return store, dbc.Alert("❌ Analysis failed — check server logs.", color="danger"), pre_analysis_content(), _RESET_HIDDEN
 
     store_data = {
         "sample_id":         sample_id,
