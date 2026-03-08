@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: qcl-breast-cancer-diagnostics
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    # Free plan: 512 MB RAM, shared CPU, spins down after inactivity.
+    # Upgrade to Starter ($7/mo) for always-on + more RAM.
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"

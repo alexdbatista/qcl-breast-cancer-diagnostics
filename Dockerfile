@@ -21,12 +21,8 @@ COPY models/ models/
 COPY data/processed/ data/processed/
 COPY data/labels/ data/labels/
 
-# HF Spaces requires port 7860; Render uses $PORT
+# Render.com sets $PORT dynamically; HF Spaces uses 7860; fallback to 7860.
 EXPOSE 7860
 
-# gunicorn picks up `server` from app_dash.py (already defined as app.server)
-CMD ["gunicorn", "app_dash:server", \
-     "--bind", "0.0.0.0:7860", \
-     "--timeout", "300", \
-     "--workers", "1", \
-     "--threads", "2"]
+# Shell form so gunicorn picks up $PORT at runtime (required by Render.com).
+CMD ["sh", "-c", "gunicorn app_dash:server --bind 0.0.0.0:${PORT:-7860} --timeout 300 --workers 1 --threads 2"]

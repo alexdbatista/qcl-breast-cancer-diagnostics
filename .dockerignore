@@ -1,0 +1,33 @@
+# Keep Docker build context small — only send what the Dockerfile needs.
+# The Dockerfile explicitly COPYs individual paths, so everything else is excluded.
+
+# Exclude notebooks and pipeline scripts
+*.ipynb
+01_data_ingestion.py
+04_model_training.py
+05_clustering_and_evaluation.py
+06_inference_and_evaluation.py
+run_pipeline.py
+run_training.py
+train_*.py
+
+# Exclude docs, figures, alternative app versions, misc requirements
+figures/
+docs/
+README*.md
+DATA_README.md
+app.py
+app_professional.py
+app_simple.py
+app_requirements.txt
+requirements.txt
+
+# Exclude raw data (only processed/ and labels/ are COPYd)
+data/raw/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.git
