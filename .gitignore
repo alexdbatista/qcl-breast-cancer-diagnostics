@@ -1,12 +1,31 @@
-# Ignore data and model artifacts
-data/
-models/*.pth
+# ── Large raw / processed data (multi-GB) ────────────────────────────────────
+# Ignore the CONTENTS (not the dirs) so !-negations below can unblock demo files
+data/raw/
+data/processed/*
+data/labels/*
 figures/
 *.mat
 *.h5
 *.hdr
 *.envi
 
-# Python
+# ── Force-include the 5 demo cubes so the app works without downloading data ──
+!data/processed/001_pca.npy
+!data/processed/002_pca.npy
+!data/processed/003_pca.npy
+!data/processed/004_pca.npy
+!data/processed/005_pca.npy
+!data/labels/001_labels.npy
+!data/labels/002_labels.npy
+!data/labels/003_labels.npy
+!data/labels/004_labels.npy
+!data/labels/005_labels.npy
+
+# ── Model checkpoints — all blocked EXCEPT the best checkpoint ───────────────
+models/*.pth
+!models/best_unet_qcl.pth
+
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+.DS_Store
